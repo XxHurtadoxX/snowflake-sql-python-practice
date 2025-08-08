@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cláusulas SQL en Snowflake - EA Tech Company</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #000000 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 20px 100px 20px;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        .company-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 25px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            border-bottom: 3px solid #29B5E8;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .description {
+            font-size: 1.2em;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            color: #e0e0e0;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .code-container {
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            overflow-x: auto;
+        }
+
+        .output-container {
+            background: #0f1419;
+            border: 2px solid #29B5E8;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 6px 12px rgba(41, 181, 232, 0.2);
+            overflow-x: auto;
+        }
+
+        .output-title {
+            font-size: 1.2em;
+            color: #29B5E8;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e0e0e0;
+            text-align: left;
+            white-space: pre-line;
+            line-height: 1.3;
+        }
+
+        .output-header {
+            color: #29B5E8;
+            font-weight: bold;
+            border-bottom: 1px solid #29B5E8;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            color: #29B5E8;
+            text-align: left;
+            white-space: pre-line;
+            line-height: 1.3;
+        }
+
+        .example-title {
+            font-size: 1.4em;
+            color: #29B5E8;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #333;
+            border: 2px solid #555;
+            color: #ffffff;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #29B5E8;
+            border-color: #29B5E8;
+            transform: translateY(-2px);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 1000;
+            border: 1px solid #29B5E8;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, #29B5E8, #1E88E5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .bullet-point {
+            font-size: 1.1em;
+            margin: 12px 0;
+            color: #f0f0f0;
+            text-align: left;
+        }
+
+        .bullet-list {
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        .syntax-highlight {
+            color: #ff6b6b;
+        }
+
+        .keyword {
+            color: #29B5E8;
+            font-weight: bold;
+        }
+
+        .table-name {
+            color: #64B5F6;
+        }
+
+        .string {
+            color: #90CAF9;
+        }
+    </style>
+</head>
+<body>
+    <div class="slideshow-container">
+        <div class="slide-counter">
+            <span id="current-slide">1</span> / <span id="total-slides">12</span>
+        </div>
+
+        <!-- Slide 1: Título -->
+        <div class="slide active">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h1>Cláusulas SQL en Snowflake</h1>
+            <div class="description">
+                Una guía completa sobre las principales cláusulas SQL y su implementación en Snowflake
+                <br><br>
+                <span class="highlight">Desde SELECT hasta LEFT JOIN</span>
+            </div>
+        </div>
+
+        <!-- Slide 2: SELECT -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">SELECT</span></h2>
+            <div class="description">
+                La cláusula <span class="highlight">SELECT</span> especifica las columnas que queremos recuperar de una tabla. Es la base de toda consulta SQL.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> <span class="table-name">CUSTOMER_ID</span>, <span class="table-name">FIRST_NAME</span>, <span class="table-name">LAST_NAME</span>, <span class="table-name">EMAIL</span>
+<span class="keyword">FROM</span> <span class="table-name">CUSTOMERS</span>;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">CUSTOMER_ID | FIRST_NAME | LAST_NAME | EMAIL</span>
+1001        | John       | Smith     | john.smith@email.com
+1002        | Maria      | Garcia    | maria.garcia@email.com
+1003        | James      | Johnson   | james.johnson@email.com
+1004        | Ana        | Rodriguez | ana.rodriguez@email.com</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Permite seleccionar columnas específicas</div>
+                <div class="bullet-point">• Usa * para seleccionar todas las columnas</div>
+                <div class="bullet-point">• Puede incluir expresiones y funciones</div>
+            </div>
+        </div>
+
+        <!-- Slide 3: FROM -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">FROM</span></h2>
+            <div class="description">
+                La cláusula <span class="highlight">FROM</span> especifica la tabla o tablas de donde queremos obtener los datos.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> <span class="table-name">CONTOSO_PRACTICE.RETAIL.PRODUCTS</span>;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">PRODUCT_ID | PRODUCT_NAME     | CATEGORY    | UNIT_PRICE | STOCK</span>
+2001       | Laptop Pro       | Electronics | 1299.99    | 25
+2002       | Wireless Mouse   | Electronics | 49.99      | 150
+2003       | Office Chair     | Furniture   | 299.99     | 30
+2004       | Coffee Mug       | Kitchen     | 12.99      | 200</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Define la fuente de datos</div>
+                <div class="bullet-point">• Puede referenciar múltiples tablas</div>
+                <div class="bullet-point">• Soporta esquemas completos: DATABASE.SCHEMA.TABLE</div>
+            </div>
+        </div>
+
+        <!-- Slide 4: WHERE -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">WHERE</span></h2>
+            <div class="description">
+                La cláusula <span class="highlight">WHERE</span> filtra las filas basándose en condiciones específicas.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> <span class="table-name">PRODUCT_NAME</span>, <span class="table-name">UNIT_PRICE</span>
+<span class="keyword">FROM</span> <span class="table-name">PRODUCTS</span>
+<span class="keyword">WHERE</span> <span class="table-name">UNIT_PRICE</span> > 50 
+  <span class="keyword">AND</span> <span class="table-name">CATEGORY</span> = <span class="string">'Electronics'</span>;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">PRODUCT_NAME     | UNIT_PRICE</span>
+Laptop Pro       | 1299.99
+Gaming Monitor   | 599.99
+Wireless Headset | 149.99
+Tablet Device    | 399.99</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Filtra registros según condiciones</div>
+                <div class="bullet-point">• Soporta operadores: =, >, <, !=, LIKE, IN</div>
+                <div class="bullet-point">• Combina condiciones con AND, OR, NOT</div>
+            </div>
+        </div>
+
+        <!-- Slide 5: GROUP BY -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">GROUP BY</span></h2>
+            <div class="description">
+                La cláusula <span class="highlight">GROUP BY</span> agrupa filas que tienen valores iguales en columnas específicas, permitiendo aplicar funciones de agregación.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> <span class="table-name">CATEGORY</span>, 
+       <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> <span class="table-name">TOTAL_PRODUCTS</span>,
+       <span class="keyword">AVG</span>(<span class="table-name">UNIT_PRICE</span>) <span class="keyword">AS</span> <span class="table-name">AVG_PRICE</span>
+<span class="keyword">FROM</span> <span class="table-name">PRODUCTS</span>
+<span class="keyword">GROUP BY</span> <span class="table-name">CATEGORY</span>;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">CATEGORY    | TOTAL_PRODUCTS | AVG_PRICE</span>
+Electronics | 15             | 524.33
+Furniture   | 8              | 245.75
+Kitchen     | 12             | 28.45
+Clothing    | 20             | 67.89</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Agrupa datos por valores comunes</div>
+                <div class="bullet-point">• Permite usar funciones: COUNT, SUM, AVG, MIN, MAX</div>
+                <div class="bullet-point">• Esencial para análisis agregados</div>
+            </div>
+        </div>
+
+        <!-- Slide 6: HAVING -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">HAVING</span></h2>
+            <div class="description">
+                La cláusula <span class="highlight">HAVING</span> filtra grupos después de aplicar GROUP BY, similar a WHERE pero para datos agregados.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> <span class="table-name">CATEGORY</span>, 
+       <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> <span class="table-name">TOTAL_PRODUCTS</span>,
+       <span class="keyword">AVG</span>(<span class="table-name">UNIT_PRICE</span>) <span class="keyword">AS</span> <span class="table-name">AVG_PRICE</span>
+<span class="keyword">FROM</span> <span class="table-name">PRODUCTS</span>
+<span class="keyword">GROUP BY</span> <span class="table-name">CATEGORY</span>
+<span class="keyword">HAVING</span> <span class="keyword">COUNT</span>(*) > 5 
+  <span class="keyword">AND</span> <span class="keyword">AVG</span>(<span class="table-name">UNIT_PRICE</span>) > 100;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">CATEGORY    | TOTAL_PRODUCTS | AVG_PRICE</span>
+Electronics | 15             | 524.33
+Furniture   | 8              | 245.75</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Filtra resultados agregados</div>
+                <div class="bullet-point">• Se usa después de GROUP BY</div>
+                <div class="bullet-point">• Aplica condiciones a funciones de agregación</div>
+            </div>
+        </div>
+
+        <!-- Slide 7: ORDER BY -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">ORDER BY</span></h2>
+            <div class="description">
+                La cláusula <span class="highlight">ORDER BY</span> ordena los resultados de la consulta según una o más columnas.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> <span class="table-name">CUSTOMER_ID</span>, <span class="table-name">FIRST_NAME</span>, <span class="table-name">LAST_NAME</span>, <span class="table-name">TOTAL_SALES</span>
+<span class="keyword">FROM</span> <span class="table-name">CUSTOMERS</span>
+<span class="keyword">WHERE</span> <span class="table-name">TOTAL_SALES</span> > 1000
+<span class="keyword">ORDER BY</span> <span class="table-name">TOTAL_SALES</span> <span class="keyword">DESC</span>, <span class="table-name">LAST_NAME</span> <span class="keyword">ASC</span>;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">CUSTOMER_ID | FIRST_NAME | LAST_NAME | TOTAL_SALES</span>
+1007        | Robert     | Johnson   | 5500.50
+1003        | Sarah      | Williams  | 4200.75
+1012        | Michael    | Brown     | 3850.25
+1005        | Jennifer   | Davis     | 2100.00</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Ordena resultados ascendente (ASC) o descendente (DESC)</div>
+                <div class="bullet-point">• Permite múltiples columnas de ordenamiento</div>
+                <div class="bullet-point">• Se ejecuta al final de la consulta</div>
+            </div>
+        </div>
+
+        <!-- Slide 8: LEFT JOIN - Introducción -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2><span class="keyword">LEFT JOIN</span></h2>
+            <div class="description">
+                El <span class="highlight">LEFT JOIN</span> combina filas de dos tablas. Devuelve todas las filas de la tabla izquierda y las filas coincidentes de la tabla derecha.
+            </div>
+            <div class="code-container">
+                <div class="example-title">Ejemplo Práctico:</div>
+                <div class="code"><span class="keyword">SELECT</span> c.<span class="table-name">CUSTOMER_ID</span>, c.<span class="table-name">FIRST_NAME</span>, c.<span class="table-name">LAST_NAME</span>,
+       s.<span class="table-name">SALES_AMOUNT</span>, s.<span class="table-name">SALES_DATE</span>
+<span class="keyword">FROM</span> <span class="table-name">CUSTOMERS</span> c
+<span class="keyword">LEFT JOIN</span> <span class="table-name">SALES</span> s 
+  <span class="keyword">ON</span> c.<span class="table-name">CUSTOMER_ID</span> = s.<span class="table-name">CUSTOMER_ID</span>;</div>
+            </div>
+            <div class="output-container">
+                <div class="output-title">Salida de Ejemplo:</div>
+                <div class="output"><span class="output-header">CUSTOMER_ID | FIRST_NAME | LAST_NAME | SALES_AMOUNT | SALES_DATE</span>
+1001        | John       | Smith     | 299.99       | 2024-01-15
+1001        | John       | Smith     | 199.50       | 2024-02-10
+1002        | Maria      | Garcia    | 450.00       | 2024-01-20
+1003        | James      | Johnson   | NULL         | NULL</div>
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• Conserva todas las filas de la tabla izquierda</div>
+                <div class="bullet-point">• Agrega NULL para filas sin coincidencia en la tabla derecha</div>
+                <div class="bullet-point">• Ideal para encontrar registros relacionados o faltantes</div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Ejemplo Completo 1 -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2>Ejemplo Completo I</h2>
+            <div class="description">
+                Consulta integrando múltiples cláusulas para analizar ventas por categoría
+            </div>
+            <div class="code-container">
+                <div class="example-title">Análisis de Ventas por Categoría:</div>
+                <div class="code"><span class="keyword">SELECT</span> p.<span class="table-name">CATEGORY</span>,
+       <span class="keyword">COUNT</span>(s.<span class="table-name">SALES_ID</span>) <span class="keyword">AS</span> <span class="table-name">TOTAL_SALES</span>,
+       <span class="keyword">SUM</span>(s.<span class="table-name">SALES_AMOUNT</span>) <span class="keyword">AS</span> <span class="table-name">REVENUE</span>,
+       <span class="keyword">AVG</span>(s.<span class="table-name">SALES_AMOUNT</span>) <span class="keyword">AS</span> <span class="table-name">AVG_SALE</span>
+<span class="keyword">FROM</span> <span class="table-name">PRODUCTS</span> p
+<span class="keyword">LEFT JOIN</span> <span class="table-name">SALES</span> s <span class="keyword">ON</span> p.<span class="table-name">PRODUCT_ID</span> = s.<span class="table-name">PRODUCT_ID</span>
+<span class="keyword">WHERE</span> s.<span class="table-name">SALES_DATE</span> >= <span class="string">'2024-01-01'</span>
+<span class="keyword">GROUP BY</span> p.<span class="table-name">CATEGORY</span>
+<span class="keyword">HAVING</span> <span class="keyword">SUM</span>(s.<span class="table-name">SALES_AMOUNT</span>) > 10000
+<span class="keyword">ORDER BY</span> <span class="table-name">REVENUE</span> <span class="keyword">DESC</span>;</div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Ejemplo Completo 2 -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2>Ejemplo Completo II</h2>
+            <div class="description">
+                Análisis de clientes con sus ventas totales usando todas las cláusulas
+            </div>
+            <div class="code-container">
+                <div class="example-title">Reporte de Clientes Top:</div>
+                <div class="code"><span class="keyword">SELECT</span> c.<span class="table-name">CUSTOMER_ID</span>,
+       c.<span class="table-name">FIRST_NAME</span> || <span class="string">' '</span> || c.<span class="table-name">LAST_NAME</span> <span class="keyword">AS</span> <span class="table-name">FULL_NAME</span>,
+       c.<span class="table-name">CITY</span>,
+       <span class="keyword">COUNT</span>(s.<span class="table-name">SALES_ID</span>) <span class="keyword">AS</span> <span class="table-name">PURCHASE_COUNT</span>,
+       <span class="keyword">SUM</span>(s.<span class="table-name">SALES_AMOUNT</span>) <span class="keyword">AS</span> <span class="table-name">TOTAL_SPENT</span>
+<span class="keyword">FROM</span> <span class="table-name">CUSTOMERS</span> c
+<span class="keyword">LEFT JOIN</span> <span class="table-name">SALES</span> s <span class="keyword">ON</span> c.<span class="table-name">CUSTOMER_ID</span> = s.<span class="table-name">CUSTOMER_ID</span>
+<span class="keyword">WHERE</span> c.<span class="table-name">REGISTRATION_DATE</span> >= <span class="string">'2023-01-01'</span>
+<span class="keyword">GROUP BY</span> c.<span class="table-name">CUSTOMER_ID</span>, c.<span class="table-name">FIRST_NAME</span>, c.<span class="table-name">LAST_NAME</span>, c.<span class="table-name">CITY</span>
+<span class="keyword">HAVING</span> <span class="keyword">COUNT</span>(s.<span class="table-name">SALES_ID</span>) >= 3
+<span class="keyword">ORDER BY</span> <span class="table-name">TOTAL_SPENT</span> <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> 20;</div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Características de Snowflake -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h2>Snowflake SQL - Características Especiales</h2>
+            <div class="description">
+                Funcionalidades únicas de Snowflake que optimizan el rendimiento de las consultas
+            </div>
+            <div class="bullet-list">
+                <div class="bullet-point">• <span class="highlight">Columnar Storage:</span> Optimizado para consultas analíticas</div>
+                <div class="bullet-point">• <span class="highlight">Auto-scaling:</span> Ajusta recursos automáticamente</div>
+                <div class="bullet-point">• <span class="highlight">Zero-copy cloning:</span> Clonación instantánea de datos</div>
+                <div class="bullet-point">• <span class="highlight">Time Travel:</span> Acceso a datos históricos</div>
+                <div class="bullet-point">• <span class="highlight">Semi-structured data:</span> Soporte nativo para JSON, XML</div>
+                <div class="bullet-point">• <span class="highlight">Data sharing:</span> Intercambio seguro de datos</div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Conclusión -->
+        <div class="slide">
+            <div class="header">
+                <img src="https://i.imgur.com/Q57HCQU.png" alt="EA Tech Company" class="logo">
+                <div class="company-name">EA Tech Company</div>
+            </div>
+            <h1>¡Gracias!</h1>
+            <div class="description">
+                Has aprendido las principales cláusulas SQL para Snowflake:
+                <br><br>
+                <span class="highlight">SELECT • FROM • WHERE • GROUP BY • HAVING • ORDER BY • LEFT JOIN</span>
+                <br><br>
+                Estas herramientas te permitirán crear consultas poderosas y eficientes para análisis de datos en Snowflake.
+                <br><br>
+                <strong>EA Tech Company</strong> - Innovación en Análisis de Datos
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="changeSlide(-1)">◀ Anterior</button>
+        <button class="nav-btn" onclick="changeSlide(1)">Siguiente ▶</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n >= totalSlides) currentSlide = 0;
+            if (n < 0) currentSlide = totalSlides - 1;
+            
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            }
+        });
+
+        // Inicializar
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
